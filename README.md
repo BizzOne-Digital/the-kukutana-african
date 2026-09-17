@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Kukutana African American History & Culture Museum
+
+Production Next.js (App Router) + TypeScript + Tailwind CSS + MongoDB website
+for the Kukutana museum, with a full admin panel for managing content,
+collections, pricing, bookings, testimonials, media, and site settings.
+
+## Stack
+
+- Next.js App Router, TypeScript, Tailwind CSS v4
+- MongoDB Atlas + Mongoose
+- Admin session auth via signed HttpOnly cookies (`jose`)
+- Image uploads stored in MongoDB (`StoredUpload`) — no local disk writes,
+  safe for Vercel/serverless
+- Deployable on Vercel or any Node.js serverless host
 
 ## Getting Started
 
-First, run the development server:
+1. Copy `.env.example` to `.env.local` and fill in:
+   - `MONGODB_URI` — your MongoDB Atlas connection string
+   - `ADMIN_SESSION_SECRET` — a long random string
+   - `NEXT_PUBLIC_SITE_URL` — e.g. `http://localhost:3000`
+   - `ADMIN_SEED_EMAIL` / `ADMIN_SEED_PASSWORD` — used only by the seed script
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+2. Install dependencies:
+   ```
+   npm install
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Seed initial content (collections, pricing, demo testimonials, and the
+   first admin user). Safe to re-run — it only creates documents that don't
+   already exist:
+   ```
+   npm run seed
+   ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+4. Run the dev server:
+   ```
+   npm run dev
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+5. Sign in to `/admin/login` with the seeded admin credentials, then use the
+   admin panel to replace placeholder images and copy with real museum
+   content.
 
-## Learn More
+## Notes
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `SiteSettings`, `HomeContent`, and `AboutContent` are singleton documents
+  that are created automatically (with sensible defaults) the first time
+  they're requested — the seed script intentionally does not touch them.
+- All images are uploaded through `/api/upload` and stored in MongoDB, then
+  served back through `/api/uploads/:folder/:filename` with long-lived
+  immutable caching. Legacy `/uploads/...` paths (from local-disk storage)
+  are automatically replaced with a placeholder since they cannot survive a
+  serverless redeploy.
+- Every admin-mutating API route re-verifies the session server-side via
+  `requireAdmin()` — middleware alone only protects page navigation.
