@@ -3,6 +3,7 @@ import { connectToDatabase } from "@/lib/mongodb";
 import Collection from "@/models/Collection";
 import Booking from "@/models/Booking";
 import Testimonial from "@/models/Testimonial";
+import GalleryPhoto from "@/models/GalleryPhoto";
 import StoredUpload from "@/models/StoredUpload";
 import ContactSubmission from "@/models/ContactSubmission";
 
@@ -10,11 +11,12 @@ export const dynamic = "force-dynamic";
 
 async function getStats() {
   await connectToDatabase();
-  const [collections, bookings, testimonials, media, unreadMessages, recentBookings, recentMessages] =
+  const [collections, bookings, testimonials, galleryPhotos, media, unreadMessages, recentBookings, recentMessages] =
     await Promise.all([
       Collection.countDocuments(),
       Booking.countDocuments(),
       Testimonial.countDocuments(),
+      GalleryPhoto.countDocuments(),
       StoredUpload.countDocuments(),
       ContactSubmission.countDocuments({ read: false }),
       Booking.find().sort({ createdAt: -1 }).limit(5).lean(),
@@ -25,6 +27,7 @@ async function getStats() {
     collections,
     bookings,
     testimonials,
+    galleryPhotos,
     media,
     unreadMessages,
     recentBookings: JSON.parse(JSON.stringify(recentBookings)),
@@ -39,6 +42,7 @@ export default async function AdminDashboardPage() {
     { label: "Total Collections", value: stats.collections, href: "/admin/services" },
     { label: "Bookings", value: stats.bookings, href: "/admin/bookings" },
     { label: "Testimonials", value: stats.testimonials, href: "/admin/testimonials" },
+    { label: "Gallery Photos", value: stats.galleryPhotos, href: "/admin/gallery" },
     { label: "Media Files", value: stats.media, href: "/admin/media" },
     { label: "Unread Messages", value: stats.unreadMessages, href: "/admin/messages" },
   ];
@@ -47,7 +51,7 @@ export default async function AdminDashboardPage() {
     <div>
       <h1 className="font-serif-heading text-ivory text-3xl mb-8">Dashboard</h1>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-12">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
         {cards.map((c) => (
           <Link
             key={c.label}

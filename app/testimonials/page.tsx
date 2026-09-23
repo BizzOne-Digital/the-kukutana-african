@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { getTestimonials } from "@/lib/data/getTestimonials";
+import { getGalleryPhotos } from "@/lib/data/getGalleryPhotos";
 import TestimonialCard from "@/components/ui/TestimonialCard";
+import PhotoGallery from "@/components/testimonials/PhotoGallery";
+import SectionHeading from "@/components/ui/SectionHeading";
 import Reveal from "@/components/ui/Reveal";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function TestimonialsPage() {
-  const testimonials = await getTestimonials();
+  const [testimonials, photos] = await Promise.all([getTestimonials(), getGalleryPhotos()]);
 
   return (
     <>
@@ -43,6 +46,23 @@ export default async function TestimonialsPage() {
           )}
         </div>
       </section>
+
+      {photos.length > 0 && (
+        <section className="bg-ivory py-20 sm:py-24">
+          <div className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-14">
+            <Reveal>
+              <SectionHeading
+                eyebrow="PHOTO GALLERY"
+                title="Moments From the Museum."
+                align="center"
+              />
+            </Reveal>
+            <div className="mt-14">
+              <PhotoGallery photos={photos} />
+            </div>
+          </div>
+        </section>
+      )}
     </>
   );
 }
