@@ -4,8 +4,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
-  Home,
-  Info,
   LayoutGrid,
   DollarSign,
   CalendarCheck,
@@ -20,8 +18,6 @@ import clsx from "clsx";
 
 const LINKS = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/home", label: "Home", icon: Home },
-  { href: "/admin/about", label: "About", icon: Info },
   { href: "/admin/services", label: "Collections", icon: LayoutGrid },
   { href: "/admin/pricing", label: "Pricing", icon: DollarSign },
   { href: "/admin/bookings", label: "Bookings", icon: CalendarCheck },
