@@ -20,13 +20,21 @@ export async function GET(
   }
 
   await connectToDatabase();
-  const upload = await StoredUpload.findOne({ folder: folder as UploadFolder, filename }).lean();
+  // Not using .lean() here: with lean(), the Buffer-typed `data` field comes
+  // back as a raw BSON Binary wrapper rather than a Node Buffer, and
+  // Buffer.from() on that wrapper silently produces a truncated buffer —
+  // the response then declares the real Content-Length but sends fewer
+  // bytes, and the connection gets aborted mid-transfer. Hydrating the
+  // document lets Mongoose's Buffer cast do this correctly.
+  const upload = await StoredUpload.findOne({ folder: folder as UploadFolder, filename });
 
   if (!upload) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  return new NextResponse(Buffer.from(upload.data as unknown as Buffer), {
+  const body = Uint8Array.from(upload.data);
+
+  return new NextResponse(body, {
     status: 200,
     headers: {
       "Content-Type": upload.mimeType,
